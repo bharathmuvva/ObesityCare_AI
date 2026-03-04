@@ -23,7 +23,7 @@ function Predict() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try{
-    const res = await axios.post("https://obesitycare-ai.onrender.com/predict", from);
+    const res = await axios.post("https://obesitycare-ai.onrender.com/predict", form);
     setResult(res.data);}
     catch(error){console.log(error)}
   };
@@ -55,14 +55,7 @@ function Predict() {
           <button className="primary" type="submit">
             Predict
           </button>
-          {result && (
-  <div className="result-card">
-    <h2>Prediction Result</h2>
-    <p><b>Risk Level:</b> {result.risk}</p>
-    <p><b>BMI:</b> {result.bmi}</p>
-    <p><b>Diet Recommendation:</b> {result.diet}</p>
-  </div>
-)}
+         
         </form>
 
         {result && (
