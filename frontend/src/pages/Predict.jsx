@@ -22,8 +22,10 @@ function Predict() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    try{
     const res = await axios.post("https://obesitycare-ai.onrender.com/predict", from);
-    setResult(res.data);
+    setResult(res.data);}
+    catch(error){console.log(error)}
   };
 
   return (
