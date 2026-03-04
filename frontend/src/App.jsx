@@ -15,6 +15,7 @@ function App() {
           <Link to="/predict">Predict</Link>
           <Link to="/about">About</Link>
           <Link to="/help">Help</Link>
+          <Link to="/dataset">Dataset</Link>
         </div>
       </div>
 

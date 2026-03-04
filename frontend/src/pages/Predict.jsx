@@ -24,6 +24,7 @@ function Predict() {
     e.preventDefault();
     try{
     const res = await axios.post("https://obesitycare-ai.onrender.com/predict", form);
+    console.log(res.data)
     setResult(res.data);}
     catch(error){console.log(error)}
   };
@@ -59,12 +60,22 @@ function Predict() {
         </form>
 
         {result && (
-          <div className={`result ${result.riskLevel.toLowerCase()}`}>
-            <p><strong>BMI:</strong> {result.bmi}</p>
-            <p><strong>Risk Level:</strong> {result.riskLevel}</p>
-            <p><strong>Suggested Diet:</strong> {result.dietPlan}</p>
-          </div>
-        )}
+  <div className={`result ${result?.riskLevel?.toLowerCase()}`}>
+    
+    <p><strong>BMI:</strong> {result.bmi}</p>
+
+    <p><strong>Predicted Class:</strong> {result.predictedClass}</p>
+
+    <p><strong>Confidence:</strong> {result.confidence}</p>
+
+    <p><strong>Risk Level:</strong> {result.riskLevel}</p>
+
+    <p><strong>Recommended Diet:</strong> {result.dietPlan}</p>
+
+  </div>
+)}
+
+
       </div>
     </div>
   );

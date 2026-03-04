@@ -7,58 +7,74 @@ app.use(express.json());
 
 function calculateRisk(data){
 
-const {weight,height,activity,diet,sleep,water} = data;
+const weight = parseFloat(data.weight)
+const height = parseFloat(data.height)
 
-const heightMeters = height/100;
-const bmi = weight/(heightMeters*heightMeters);
+const bmi = weight / ((height/100)*(height/100))
 
-let score = 0;
+let score = 0
 
-// BMI effect
-if(bmi < 18.5) score += 1;
-else if(bmi < 25) score += 2;
-else if(bmi < 30) score += 4;
-else score += 6;
+// BMI influence
+if(bmi < 18.5) score += 1
+else if(bmi < 25) score += 2
+else if(bmi < 30) score += 3
+else score += 4
 
-// activity
-if(activity === "low") score += 3;
-if(activity === "moderate") score += 2;
-if(activity === "high") score += 0;
+// Diet impact
+if(data.diet === "poor") score += 3
+else if(data.diet === "average") score += 2
+else score += 1
 
-// diet
-if(diet === "poor") score += 4;
-if(diet === "average") score += 2;
-if(diet === "good") score += 0;
+// Activity impact
+if(data.activity === "low") score += 3
+else if(data.activity === "moderate") score += 2
+else score += 1
 
-// sleep
-if(sleep < 6) score += 3;
-else if(sleep < 8) score += 1;
+// Sleep impact
+if(data.sleep < 6) score += 3
+else if(data.sleep < 8) score += 2
+else score += 1
 
-// water
-if(water < 1.5) score += 3;
-else if(water < 3) score += 1;
+// Water intake
+if(data.water < 2) score += 3
+else if(data.water < 3) score += 2
+else score += 1
 
-let riskLevel;
-let dietPlan;
 
-if(score <= 5){
-riskLevel="LOW";
-dietPlan="Maintain balanced diet rich in vegetables, lean protein, and daily physical activity.";
+let predictedClass
+let riskLevel
+let dietPlan
+let confidence
+
+// Risk classification
+if(score <= 7){
+predictedClass="Normal Weight"
+riskLevel="Low"
+dietPlan="Maintain balanced diet, regular exercise, and hydration."
+confidence=0.82
 }
-else if(score <= 10){
-riskLevel="AVERAGE";
-dietPlan="Reduce sugar and fast food consumption. Increase fiber intake and maintain moderate exercise.";
+
+else if(score <= 11){
+predictedClass="Overweight"
+riskLevel="Average"
+dietPlan="Reduce sugar and fast food consumption. Increase fiber intake and moderate exercise."
+confidence=0.88
 }
+
 else{
-riskLevel="HIGH";
-dietPlan="Adopt calorie controlled diet, increase physical activity, and consult healthcare professionals.";
+predictedClass="Obese"
+riskLevel="High"
+dietPlan="Follow calorie deficit diet, increase physical activity, and consult healthcare professional."
+confidence=0.93
 }
 
 return{
 bmi:bmi.toFixed(2),
-riskLevel,
-dietPlan
-};
+predictedClass:predictedClass,
+confidence:confidence,
+riskLevel:riskLevel,
+dietPlan:dietPlan
+}
 
 }
 
