@@ -55,6 +55,14 @@ function Predict() {
           <button className="primary" type="submit">
             Predict
           </button>
+          {result && (
+  <div className="result-card">
+    <h2>Prediction Result</h2>
+    <p><b>Risk Level:</b> {result.risk}</p>
+    <p><b>BMI:</b> {result.bmi}</p>
+    <p><b>Diet Recommendation:</b> {result.diet}</p>
+  </div>
+)}
         </form>
 
         {result && (
