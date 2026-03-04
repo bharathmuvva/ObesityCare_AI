@@ -5,44 +5,63 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-function calculateRisk(data) {
-  const { weight, height, activity, diet, sleep, water } = data;
+function calculateRisk(data){
 
-  const heightInMeters = height / 100;
-  const bmi = weight / (heightInMeters * heightInMeters);
+const {weight,height,activity,diet,sleep,water} = data;
 
-  let score = 0;
+const heightMeters = height/100;
+const bmi = weight/(heightMeters*heightMeters);
 
-  if (bmi < 18.5) score += 1;
-  else if (bmi < 25) score += 2;
-  else if (bmi < 30) score += 4;
-  else score += 6;
+let score = 0;
 
-  if (activity === "low") score += 3;
-  if (activity === "moderate") score += 2;
+// BMI effect
+if(bmi < 18.5) score += 1;
+else if(bmi < 25) score += 2;
+else if(bmi < 30) score += 4;
+else score += 6;
 
-  if (diet === "poor") score += 3;
-  if (diet === "average") score += 2;
+// activity
+if(activity === "low") score += 3;
+if(activity === "moderate") score += 2;
+if(activity === "high") score += 0;
 
-  if (sleep < 6) score += 2;
-  if (water < 2) score += 2;
+// diet
+if(diet === "poor") score += 4;
+if(diet === "average") score += 2;
+if(diet === "good") score += 0;
 
-  let riskLevel;
-  let dietPlan;
+// sleep
+if(sleep < 6) score += 3;
+else if(sleep < 8) score += 1;
 
-  if (score <= 5) {
-    riskLevel = "LOW";
-    dietPlan = "Maintain balanced diet with vegetables, fruits, and regular exercise.";
-  } else if (score <= 10) {
-    riskLevel = "AVERAGE";
-    dietPlan = "Reduce sugar, increase fiber, moderate calorie deficit, daily activity.";
-  } else {
-    riskLevel = "HIGH";
-    dietPlan = "Strict low calorie diet, high protein, avoid processed food, consult doctor.";
-  }
+// water
+if(water < 1.5) score += 3;
+else if(water < 3) score += 1;
 
-  return { bmi: bmi.toFixed(2), riskLevel, dietPlan };
+let riskLevel;
+let dietPlan;
+
+if(score <= 5){
+riskLevel="LOW";
+dietPlan="Maintain balanced diet rich in vegetables, lean protein, and daily physical activity.";
 }
+else if(score <= 10){
+riskLevel="AVERAGE";
+dietPlan="Reduce sugar and fast food consumption. Increase fiber intake and maintain moderate exercise.";
+}
+else{
+riskLevel="HIGH";
+dietPlan="Adopt calorie controlled diet, increase physical activity, and consult healthcare professionals.";
+}
+
+return{
+bmi:bmi.toFixed(2),
+riskLevel,
+dietPlan
+};
+
+}
+
 
 app.post("/predict", (req, res) => {
   const result = calculateRisk(req.body);

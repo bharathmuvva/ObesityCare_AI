@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import Predict from "./pages/Predict";
 import About from "./pages/About";
 import Help from "./pages/Help";
+import Dataset from "./pages/Dataset";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/predict" element={<Predict />} />
         <Route path="/about" element={<About />} />
         <Route path="/help" element={<Help />} />
+        <Route path="/dataset" element={<Dataset />} />
       </Routes>
       <div style={{
   marginTop: "100px",

@@ -184,29 +184,21 @@ button.primary:hover {
 }
 
 /* Result Colors */
-.result {
-  margin-top: 30px;
-  padding: 25px;
-  border-radius: 18px;
-  font-size: 15px;
-  line-height: 1.8;
+.result{
+margin-top:20px;
+padding:20px;
+border-radius:12px;
+font-size:16px;
 }
 
-.low {
-  background: rgba(34,197,94,0.15);
-  border: 1px solid rgba(34,197,94,0.4);
+.result.low{
+background:#064e3b;
 }
 
-.average {
-  background: rgba(234,179,8,0.15);
-  border: 1px solid rgba(234,179,8,0.4);
+.result.average{
+background:#78350f;
 }
 
-.high {
-  background: rgba(239,68,68,0.15);
-  border: 1px solid rgba(239,68,68,0.4);
+.result.high{
+background:#7f1d1d;
 }
-
-.low { background: rgba(34,197,94,0.15); }
-.average { background: rgba(234,179,8,0.15); }
-.high { background: rgba(239,68,68,0.15); }
