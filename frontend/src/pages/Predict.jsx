@@ -22,7 +22,7 @@ function Predict() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await axios.post("http://localhost:5000/predict", form);
+    const res = await axios.post("https://obesitycare-ai.onrender.com/predict", form);
     setResult(res.data);
   };
 
