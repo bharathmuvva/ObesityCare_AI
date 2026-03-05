@@ -5,48 +5,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-function calculateRisk(data){
-
-const weight = parseFloat(data.weight)
-const height = parseFloat(data.height)
-
-const bmi = weight / ((height/100)*(height/100))
-
-let score = 0
-
-// BMI influence
-if(bmi < 18.5) score += 1
-else if(bmi < 25) score += 2
-else if(bmi < 30) score += 3
-else score += 4
-
-// Diet impact
-if(data.diet === "poor") score += 3
-else if(data.diet === "average") score += 2
-else score += 1
-
-// Activity impact
-if(data.activity === "low") score += 3
-else if(data.activity === "moderate") score += 2
-else score += 1
-
-// Sleep impact
-if(data.sleep < 6) score += 3
-else if(data.sleep < 8) score += 2
-else score += 1
-
-// Water intake
-if(data.water < 2) score += 3
-else if(data.water < 3) score += 2
-else score += 1
-
-
-let predictedClass
-let riskLevel
-let dietPlan
-let confidence
-
-// Risk classification
 function calculateRisk(data) {
 
   const weight = Number(data.weight);
@@ -59,6 +17,7 @@ function calculateRisk(data) {
   let confidence;
   let dietPlan;
 
+  // Base classification using BMI
   if (bmi < 18.5) {
     predictedClass = "Underweight";
     riskLevel = "Low";
@@ -87,6 +46,23 @@ function calculateRisk(data) {
     dietPlan = "Follow calorie deficit diet, increase physical activity, and consult healthcare professional.";
   }
 
+  // Lifestyle adjustment scoring
+  let score = 0;
+
+  if (data.diet === "poor") score += 2;
+  if (data.activity === "low") score += 2;
+  if (Number(data.sleep) < 6) score += 1;
+  if (Number(data.water) < 2) score += 1;
+
+  // Slightly adjust risk if lifestyle is bad
+  if (score >= 3 && predictedClass === "Normal Weight") {
+    riskLevel = "Average";
+  }
+
+  if (score >= 4 && predictedClass === "Overweight") {
+    riskLevel = "High";
+  }
+
   return {
     bmi: bmi.toFixed(2),
     predictedClass,
@@ -94,9 +70,8 @@ function calculateRisk(data) {
     riskLevel,
     dietPlan
   };
+}
 
-}
-}
 
 
 app.post("/predict", (req, res) => {
