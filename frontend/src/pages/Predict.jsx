@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 function Predict() {
   const [form, setForm] = useState({
@@ -19,15 +20,46 @@ function Predict() {
       [e.target.name]: e.target.value
     });
   };
+   const [loading, setLoading] = useState(null);
+   
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    try{
-    const res = await axios.post("https://obesitycare-ai.onrender.com/predict", form);
-    console.log(res.data)
-    setResult(res.data);}
-    catch(error){console.log(error)}
-  };
+
+  e.preventDefault();
+
+  setLoading(true);
+  setResult(null);
+
+  try {
+
+    const res = await axios.post(
+      "https://obesitycare-ai.onrender.com/predict",
+      form
+    );
+
+    setResult(res.data);
+
+    Swal.fire({
+      title: "Prediction Complete",
+      text: "AI model successfully analyzed your health data.",
+      icon: "success",
+      confirmButtonColor: "#00bfff"
+    });
+
+  } catch (error) {
+
+    Swal.fire({
+      title: "Error",
+      text: "Prediction failed. Please try again.",
+      icon: "error"
+    });
+
+  }
+
+  setLoading(false);
+
+};
+
 
   return (
     <div className="section">
@@ -58,6 +90,17 @@ function Predict() {
           </button>
          
         </form>
+        {loading && (
+
+<div className="loadingBox">
+
+<div className="spinner"></div>
+
+<p>AI Model Analyzing Health Data...</p>
+
+</div>
+
+)}
 
         {result && (
   <div className={`result ${result?.riskLevel?.toLowerCase()}`}>
