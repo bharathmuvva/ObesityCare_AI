@@ -47,35 +47,55 @@ let dietPlan
 let confidence
 
 // Risk classification
-if(score <= 7){
-predictedClass="Normal Weight"
-riskLevel="Low"
-dietPlan="Maintain balanced diet, regular exercise, and hydration."
-confidence=0.82
-}
+function calculateRisk(data) {
 
-else if(score <= 11){
-predictedClass="Overweight"
-riskLevel="Average"
-dietPlan="Reduce sugar and fast food consumption. Increase fiber intake and moderate exercise."
-confidence=0.88
-}
+  const weight = Number(data.weight);
+  const height = Number(data.height) / 100;
 
-else{
-predictedClass="Obese"
-riskLevel="High"
-dietPlan="Follow calorie deficit diet, increase physical activity, and consult healthcare professional."
-confidence=0.93
-}
+  const bmi = weight / (height * height);
 
-return{
-bmi:bmi.toFixed(2),
-predictedClass:predictedClass,
-confidence:confidence,
-riskLevel:riskLevel,
-dietPlan:dietPlan
-}
+  let predictedClass;
+  let riskLevel;
+  let confidence;
+  let dietPlan;
 
+  if (bmi < 18.5) {
+    predictedClass = "Underweight";
+    riskLevel = "Low";
+    confidence = 0.85;
+    dietPlan = "Increase calorie intake and maintain balanced nutrition.";
+  }
+
+  else if (bmi < 25) {
+    predictedClass = "Normal Weight";
+    riskLevel = "Low";
+    confidence = 0.90;
+    dietPlan = "Maintain balanced diet and regular physical activity.";
+  }
+
+  else if (bmi < 30) {
+    predictedClass = "Overweight";
+    riskLevel = "Average";
+    confidence = 0.88;
+    dietPlan = "Reduce sugar and fast food consumption. Increase fiber intake and moderate exercise.";
+  }
+
+  else {
+    predictedClass = "Obese";
+    riskLevel = "High";
+    confidence = 0.93;
+    dietPlan = "Follow calorie deficit diet, increase physical activity, and consult healthcare professional.";
+  }
+
+  return {
+    bmi: bmi.toFixed(2),
+    predictedClass,
+    confidence,
+    riskLevel,
+    dietPlan
+  };
+
+}
 }
 
 
