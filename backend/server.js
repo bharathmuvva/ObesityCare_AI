@@ -5,114 +5,183 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-function calculateRisk(data){
+function calculatePrediction(data){
 
-  const weight = Number(data.weight)
-  const height = Number(data.height) / 100
-  const activity = data.activity
-  const diet = data.diet
-  const sleep = Number(data.sleep)
-  const water = Number(data.water)
+const height = parseFloat(data.height);
+const weight = parseFloat(data.weight);
+const water = parseFloat(data.water);
+const sleep = parseFloat(data.sleep);
+const activity = parseFloat(data.activity);
+const junkFood = parseFloat(data.junkFood);
+const vegetables = parseFloat(data.vegetables);
 
-  const bmi = weight / (height * height)
+/* -----------------------
+   BMI Calculation
+------------------------*/
 
-  let predictedClass
-  let riskLevel
-  let confidence
-  let dietPlan
+const bmi = weight / (height * height);
 
-  // ---- BMI Classification (WHO Standard)
+let bmiStatus;
+let bmiSymbol;
+let bmiColor;
 
-  if(bmi < 18.5){
-    predictedClass = "Underweight"
-  }
-  else if(bmi < 25){
-    predictedClass = "Normal Weight"
-  }
-  else if(bmi < 30){
-    predictedClass = "Overweight"
-  }
-  else{
-    predictedClass = "Obese"
-  }
+if(bmi < 18.5){
+bmiStatus = "Underweight";
+bmiSymbol = "🔵";
+bmiColor = "blue";
+}
+else if(bmi < 25){
+bmiStatus = "Normal";
+bmiSymbol = "🟢";
+bmiColor = "green";
+}
+else if(bmi < 30){
+bmiStatus = "Overweight";
+bmiSymbol = "🟠";
+bmiColor = "orange";
+}
+else{
+bmiStatus = "Obese";
+bmiSymbol = "🔴";
+bmiColor = "red";
+}
 
-  // ---- Lifestyle Risk Score
+/* -----------------------
+   Lifestyle Risk Scoring
+------------------------*/
 
-  let riskScore = 0
+let score = 0;
 
-  // Diet impact
-  if(diet === "poor") riskScore += 3
-  else if(diet === "average") riskScore += 2
-  else riskScore += 1
+/* BMI weight */
+score += bmi * 1.4;
 
-  // Activity impact
-  if(activity === "low") riskScore += 3
-  else if(activity === "moderate") riskScore += 2
-  else riskScore += 1
+/* Activity influence */
 
-  // Sleep
-  if(sleep < 6) riskScore += 3
-  else if(sleep < 7) riskScore += 2
-  else riskScore += 1
+if(activity === 0) score += 12;
+else if(activity === 1) score += 8;
+else if(activity === 2) score += 4;
 
-  // Water
-  if(water < 2) riskScore += 3
-  else if(water < 3) riskScore += 2
-  else riskScore += 1
+/* Sleep influence */
 
-  // ---- Risk Level Calculation
+if(sleep < 5) score += 10;
+else if(sleep < 6) score += 6;
+else if(sleep < 7) score += 3;
 
-  if(predictedClass === "Obese" || riskScore >= 10){
-    riskLevel = "High"
-  }
-  else if(predictedClass === "Overweight" || riskScore >= 7){
-    riskLevel = "Moderate"
-  }
-  else{
-    riskLevel = "Low"
-  }
+/* Water influence */
 
-  // ---- Confidence estimation
+if(water < 1.5) score += 7;
+else if(water < 2) score += 4;
 
-  confidence = (0.82 + (Math.random() * 0.1)).toFixed(2)
+/* Junk food influence */
 
-  // ---- Smart Diet Recommendations
+if(junkFood >= 4) score += 10;
+else if(junkFood >= 3) score += 6;
+else if(junkFood >= 2) score += 3;
 
-  if(predictedClass === "Underweight"){
-    dietPlan = "Increase calorie intake with healthy foods such as nuts, dairy, eggs, and whole grains. Strength training and balanced nutrition recommended."
-  }
+/* Vegetables reduce risk */
 
-  else if(predictedClass === "Normal Weight"){
-    dietPlan = "Maintain a balanced diet rich in vegetables, fruits, lean protein, and whole grains. Continue regular exercise and hydration."
-  }
+if(vegetables >= 4) score -= 6;
+else if(vegetables >= 3) score -= 4;
 
-  else if(predictedClass === "Overweight"){
-    dietPlan = "Reduce processed foods and sugary drinks. Increase fiber intake, vegetables, lean protein, and perform regular cardio exercises."
-  }
+/* -----------------------
+   Risk Classification
+------------------------*/
 
-  else{
-    dietPlan = "Adopt a calorie deficit diet. Avoid fried foods, sugary drinks, and processed snacks. Increase physical activity and consult healthcare professionals."
-  }
+let risk;
+let riskSymbol;
+let riskColor;
 
-  return{
-    bmi: bmi.toFixed(2),
-    predictedClass,
-    riskLevel,
-    confidence,
-    dietPlan
-  }
+if(score < 25){
+risk = "Low Risk";
+riskSymbol = "🟢";
+riskColor = "green";
+}
+else if(score < 40){
+risk = "Moderate Risk";
+riskSymbol = "🟠";
+riskColor = "orange";
+}
+else{
+risk = "High Risk";
+riskSymbol = "🔴";
+riskColor = "red";
+}
+
+/* -----------------------
+   Diet Recommendation
+------------------------*/
+
+let recommendations = [];
+
+/* BMI specific */
+
+if(bmiStatus === "Underweight"){
+recommendations.push("Increase calorie intake");
+recommendations.push("Add healthy fats like nuts and peanut butter");
+recommendations.push("Increase protein consumption");
+}
+
+if(bmiStatus === "Overweight"){
+recommendations.push("Reduce refined carbohydrates");
+recommendations.push("Increase fiber rich foods");
+recommendations.push("Perform 30 minutes daily exercise");
+}
+
+if(bmiStatus === "Obese"){
+recommendations.push("Follow calorie deficit diet");
+recommendations.push("Daily cardio exercise recommended");
+recommendations.push("Avoid sugary beverages");
+}
+
+/* Lifestyle corrections */
+
+if(water < 2){
+recommendations.push("Increase daily water intake to at least 2–3 liters");
+}
+
+if(sleep < 7){
+recommendations.push("Maintain 7–8 hours of sleep for metabolic balance");
+}
+
+if(activity < 2){
+recommendations.push("Increase physical activity such as walking or cycling");
+}
+
+if(junkFood > 3){
+recommendations.push("Reduce fast food consumption");
+}
+
+if(vegetables < 2){
+recommendations.push("Include vegetables in daily meals");
+}
+
+/* Remove duplicates */
+
+recommendations = [...new Set(recommendations)];
+
+return{
+bmi: bmi.toFixed(2),
+bmiStatus,
+bmiSymbol,
+bmiColor,
+risk,
+riskSymbol,
+riskColor,
+score: score.toFixed(2),
+recommendations
+}
 
 }
 
 
 
 
-app.post("/predict", (req, res) => {
-  const result = calculateRisk(req.body);
-  res.json(result);
-});
+app.post("/predict",(req,res)=>{
 
-const PORT = 5000;
-app.listen(PORT, () => {
-  console.log(`Backend running on http://localhost:${PORT}`);
-});
+const data = req.body;
+
+const result = calculatePrediction(data);
+
+res.json(result);
+
+})
