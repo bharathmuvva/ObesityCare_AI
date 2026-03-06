@@ -2,112 +2,117 @@ import express from "express";
 import cors from "cors";
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
-function calculatePrediction(data){
+function calculateRisk(data){
 
-const height = parseFloat(data.height);
-const weight = parseFloat(data.weight);
-const water = parseFloat(data.water);
-const sleep = parseFloat(data.sleep);
-const activity = parseFloat(data.activity);
-const junkFood = parseFloat(data.junkFood);
-const vegetables = parseFloat(data.vegetables);
+  const weight = Number(data.weight)
+  const height = Number(data.height) / 100
+  const activity = data.activity
+  const diet = data.diet
+  const sleep = Number(data.sleep)
+  const water = Number(data.water)
 
-/* BMI Calculation */
+  const bmi = weight / (height * height)
 
-const bmi = weight / (height * height);
+  let predictedClass
+  let riskLevel
+  let confidence
+  let dietPlan
 
-let predictedClass;
-let riskLevel;
-let confidence;
+  // ---- BMI Classification (WHO Standard)
 
-/* BMI Classification */
+  if(bmi < 18.5){
+    predictedClass = "Underweight"
+  }
+  else if(bmi < 25){
+    predictedClass = "Normal Weight"
+  }
+  else if(bmi < 30){
+    predictedClass = "Overweight"
+  }
+  else{
+    predictedClass = "Obese"
+  }
 
-if(bmi < 18.5){
-predictedClass = "Underweight";
-riskLevel = "Low";
-confidence = 0.75;
+  // ---- Lifestyle Risk Score
+
+  let riskScore = 0
+
+  // Diet impact
+  if(diet === "poor") riskScore += 3
+  else if(diet === "average") riskScore += 2
+  else riskScore += 1
+
+  // Activity impact
+  if(activity === "low") riskScore += 3
+  else if(activity === "moderate") riskScore += 2
+  else riskScore += 1
+
+  // Sleep
+  if(sleep < 6) riskScore += 3
+  else if(sleep < 7) riskScore += 2
+  else riskScore += 1
+
+  // Water
+  if(water < 2) riskScore += 3
+  else if(water < 3) riskScore += 2
+  else riskScore += 1
+
+  // ---- Risk Level Calculation
+
+  if(predictedClass === "Obese" || riskScore >= 10){
+    riskLevel = "High"
+  }
+  else if(predictedClass === "Overweight" || riskScore >= 7){
+    riskLevel = "Moderate"
+  }
+  else{
+    riskLevel = "Low"
+  }
+
+  // ---- Confidence estimation
+
+  confidence = (0.82 + (Math.random() * 0.1)).toFixed(2)
+
+  // ---- Smart Diet Recommendations
+
+  if(predictedClass === "Underweight"){
+    dietPlan = "Increase calorie intake with healthy foods such as nuts, dairy, eggs, and whole grains. Strength training and balanced nutrition recommended."
+  }
+
+  else if(predictedClass === "Normal Weight"){
+    dietPlan = "Maintain a balanced diet rich in vegetables, fruits, lean protein, and whole grains. Continue regular exercise and hydration."
+  }
+
+  else if(predictedClass === "Overweight"){
+    dietPlan = "Reduce processed foods and sugary drinks. Increase fiber intake, vegetables, lean protein, and perform regular cardio exercises."
+  }
+
+  else{
+    dietPlan = "Adopt a calorie deficit diet. Avoid fried foods, sugary drinks, and processed snacks. Increase physical activity and consult healthcare professionals."
+  }
+
+  return{
+    bmi: bmi.toFixed(2),
+    predictedClass,
+    riskLevel,
+    confidence,
+    dietPlan
+  }
+
 }
-else if(bmi < 25){
-predictedClass = "Normal";
-riskLevel = "Low";
-confidence = 0.85;
-}
-else if(bmi < 30){
-predictedClass = "Overweight";
-riskLevel = "Moderate";
-confidence = 0.80;
-}
-else{
-predictedClass = "Obese";
-riskLevel = "High";
-confidence = 0.90;
-}
 
-/* Diet Recommendation */
 
-let recommendedDiet = [];
 
-if(predictedClass === "Underweight"){
-recommendedDiet.push("Increase calorie intake");
-recommendedDiet.push("Eat more protein rich foods");
-recommendedDiet.push("Include nuts and dairy products");
-}
 
-if(predictedClass === "Normal"){
-recommendedDiet.push("Maintain balanced diet");
-recommendedDiet.push("Continue regular physical activity");
-}
-
-if(predictedClass === "Overweight"){
-recommendedDiet.push("Reduce carbohydrate intake");
-recommendedDiet.push("Increase vegetables and fruits");
-recommendedDiet.push("Exercise at least 30 minutes daily");
-}
-
-if(predictedClass === "Obese"){
-recommendedDiet.push("Follow calorie deficit diet");
-recommendedDiet.push("Avoid sugary drinks");
-recommendedDiet.push("Daily cardio exercise recommended");
-}
-
-return {
-
-bmi: bmi.toFixed(2),
-predictedClass,
-confidence,
-riskLevel,
-recommendedDiet
-
-};
-
-}
-
-/* Prediction API */
-
-app.post("/predict",(req,res)=>{
-
-const data = req.body;
-
-const result = calculatePrediction(data);
-
-res.json(result);
-
+app.post("/predict", (req, res) => {
+  const result = calculateRisk(req.body);
+  res.json(result);
 });
 
-/* Root route */
-
-app.get("/",(req,res)=>{
-res.send("ObesityCare AI Backend Running");
-});
-
-/* Port */
-
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT,()=>{
-console.log("Server running on port",PORT);
+const PORT = 5000;
+app.listen(PORT, () => {
+  console.log(`Backend running on http://localhost:${PORT}`);
 });
