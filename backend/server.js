@@ -2,24 +2,31 @@ import express from "express";
 import cors from "cors";
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-function calculatePrediction(data){
+/* --------------------------------
+   Prediction Engine
+-------------------------------- */
 
-const height = parseFloat(data.height);
-const weight = parseFloat(data.weight);
-const water = parseFloat(data.water);
-const sleep = parseFloat(data.sleep);
-const activity = parseFloat(data.activity);
-const junkFood = parseFloat(data.junkFood);
-const vegetables = parseFloat(data.vegetables);
+function calculatePrediction(data) {
 
-/* -----------------------
-   BMI Calculation
-------------------------*/
+const height = parseFloat(data.height) || 0;
+const weight = parseFloat(data.weight) || 0;
+const water = parseFloat(data.water) || 0;
+const sleep = parseFloat(data.sleep) || 0;
+const activity = parseFloat(data.activity) || 0;
+const junkFood = parseFloat(data.junkFood) || 0;
+const vegetables = parseFloat(data.vegetables) || 0;
 
-const bmi = weight / (height * height);
+if(height <= 0 || weight <= 0){
+return { error: "Invalid height or weight" };
+}
+
+/* BMI */
+
+const bmi = weight / (height ** 2);
 
 let bmiStatus;
 let bmiSymbol;
@@ -46,46 +53,31 @@ bmiSymbol = "🔴";
 bmiColor = "red";
 }
 
-/* -----------------------
-   Lifestyle Risk Scoring
-------------------------*/
+/* Risk scoring */
 
 let score = 0;
 
-/* BMI weight */
 score += bmi * 1.4;
-
-/* Activity influence */
 
 if(activity === 0) score += 12;
 else if(activity === 1) score += 8;
 else if(activity === 2) score += 4;
 
-/* Sleep influence */
-
 if(sleep < 5) score += 10;
 else if(sleep < 6) score += 6;
 else if(sleep < 7) score += 3;
 
-/* Water influence */
-
 if(water < 1.5) score += 7;
 else if(water < 2) score += 4;
-
-/* Junk food influence */
 
 if(junkFood >= 4) score += 10;
 else if(junkFood >= 3) score += 6;
 else if(junkFood >= 2) score += 3;
 
-/* Vegetables reduce risk */
-
 if(vegetables >= 4) score -= 6;
 else if(vegetables >= 3) score -= 4;
 
-/* -----------------------
-   Risk Classification
-------------------------*/
+/* Risk classification */
 
 let risk;
 let riskSymbol;
@@ -107,13 +99,9 @@ riskSymbol = "🔴";
 riskColor = "red";
 }
 
-/* -----------------------
-   Diet Recommendation
-------------------------*/
+/* Recommendations */
 
 let recommendations = [];
-
-/* BMI specific */
 
 if(bmiStatus === "Underweight"){
 recommendations.push("Increase calorie intake");
@@ -124,27 +112,25 @@ recommendations.push("Increase protein consumption");
 if(bmiStatus === "Overweight"){
 recommendations.push("Reduce refined carbohydrates");
 recommendations.push("Increase fiber rich foods");
-recommendations.push("Perform 30 minutes daily exercise");
+recommendations.push("Exercise at least 30 minutes daily");
 }
 
 if(bmiStatus === "Obese"){
-recommendations.push("Follow calorie deficit diet");
+recommendations.push("Follow a calorie deficit diet");
 recommendations.push("Daily cardio exercise recommended");
 recommendations.push("Avoid sugary beverages");
 }
 
-/* Lifestyle corrections */
-
 if(water < 2){
-recommendations.push("Increase daily water intake to at least 2–3 liters");
+recommendations.push("Increase daily water intake to at least 2-3 liters");
 }
 
 if(sleep < 7){
-recommendations.push("Maintain 7–8 hours of sleep for metabolic balance");
+recommendations.push("Maintain 7-8 hours of sleep for metabolic balance");
 }
 
 if(activity < 2){
-recommendations.push("Increase physical activity such as walking or cycling");
+recommendations.push("Increase physical activity like walking or cycling");
 }
 
 if(junkFood > 3){
@@ -155,33 +141,71 @@ if(vegetables < 2){
 recommendations.push("Include vegetables in daily meals");
 }
 
-/* Remove duplicates */
+if(bmi > 27){
+recommendations.push("Increase daily step count to at least 8000 steps");
+}
+
+if(score > 40){
+recommendations.push("Consider consulting a healthcare professional");
+}
+
+/* remove duplicates */
 
 recommendations = [...new Set(recommendations)];
 
-return{
+return {
+
 bmi: bmi.toFixed(2),
 bmiStatus,
 bmiSymbol,
 bmiColor,
+
 risk,
 riskSymbol,
 riskColor,
+
 score: score.toFixed(2),
+
 recommendations
-}
+
+};
 
 }
 
+/* --------------------------------
+   API Route
+-------------------------------- */
 
+app.post("/predict", (req,res)=>{
 
-
-app.post("/predict",(req,res)=>{
+const start = Date.now();
 
 const data = req.body;
 
 const result = calculatePrediction(data);
 
+const end = Date.now();
+
+console.log("Prediction time:", end - start, "ms");
+
 res.json(result);
 
-})
+});
+
+/* --------------------------------
+   Health route
+-------------------------------- */
+
+app.get("/", (req,res)=>{
+res.send("ObesityCare AI Backend Running");
+});
+
+/* --------------------------------
+   PORT (RENDER FIX)
+-------------------------------- */
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, ()=>{
+console.log("Server running on port", PORT);
+});
