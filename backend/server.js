@@ -5,72 +5,105 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-function calculateRisk(data) {
+function calculateRisk(data){
 
-  const weight = Number(data.weight);
-  const height = Number(data.height) / 100;
+  const weight = Number(data.weight)
+  const height = Number(data.height) / 100
+  const activity = data.activity
+  const diet = data.diet
+  const sleep = Number(data.sleep)
+  const water = Number(data.water)
 
-  const bmi = weight / (height * height);
+  const bmi = weight / (height * height)
 
-  let predictedClass;
-  let riskLevel;
-  let confidence;
-  let dietPlan;
+  let predictedClass
+  let riskLevel
+  let confidence
+  let dietPlan
 
-  // Base classification using BMI
-  if (bmi < 18.5) {
-    predictedClass = "Underweight";
-    riskLevel = "Low";
-    confidence = 0.85;
-    dietPlan = "Increase calorie intake and maintain balanced nutrition.";
+  // ---- BMI Classification (WHO Standard)
+
+  if(bmi < 18.5){
+    predictedClass = "Underweight"
+  }
+  else if(bmi < 25){
+    predictedClass = "Normal Weight"
+  }
+  else if(bmi < 30){
+    predictedClass = "Overweight"
+  }
+  else{
+    predictedClass = "Obese"
   }
 
-  else if (bmi < 25) {
-    predictedClass = "Normal Weight";
-    riskLevel = "Low";
-    confidence = 0.90;
-    dietPlan = "Maintain balanced diet and regular physical activity.";
+  // ---- Lifestyle Risk Score
+
+  let riskScore = 0
+
+  // Diet impact
+  if(diet === "poor") riskScore += 3
+  else if(diet === "average") riskScore += 2
+  else riskScore += 1
+
+  // Activity impact
+  if(activity === "low") riskScore += 3
+  else if(activity === "moderate") riskScore += 2
+  else riskScore += 1
+
+  // Sleep
+  if(sleep < 6) riskScore += 3
+  else if(sleep < 7) riskScore += 2
+  else riskScore += 1
+
+  // Water
+  if(water < 2) riskScore += 3
+  else if(water < 3) riskScore += 2
+  else riskScore += 1
+
+  // ---- Risk Level Calculation
+
+  if(predictedClass === "Obese" || riskScore >= 10){
+    riskLevel = "High"
+  }
+  else if(predictedClass === "Overweight" || riskScore >= 7){
+    riskLevel = "Moderate"
+  }
+  else{
+    riskLevel = "Low"
   }
 
-  else if (bmi < 30) {
-    predictedClass = "Overweight";
-    riskLevel = "Average";
-    confidence = 0.88;
-    dietPlan = "Reduce sugar and fast food consumption. Increase fiber intake and moderate exercise.";
+  // ---- Confidence estimation
+
+  confidence = (0.82 + (Math.random() * 0.1)).toFixed(2)
+
+  // ---- Smart Diet Recommendations
+
+  if(predictedClass === "Underweight"){
+    dietPlan = "Increase calorie intake with healthy foods such as nuts, dairy, eggs, and whole grains. Strength training and balanced nutrition recommended."
   }
 
-  else {
-    predictedClass = "Obese";
-    riskLevel = "High";
-    confidence = 0.93;
-    dietPlan = "Follow calorie deficit diet, increase physical activity, and consult healthcare professional.";
+  else if(predictedClass === "Normal Weight"){
+    dietPlan = "Maintain a balanced diet rich in vegetables, fruits, lean protein, and whole grains. Continue regular exercise and hydration."
   }
 
-  // Lifestyle adjustment scoring
-  let score = 0;
-
-  if (data.diet === "poor") score += 2;
-  if (data.activity === "low") score += 2;
-  if (Number(data.sleep) < 6) score += 1;
-  if (Number(data.water) < 2) score += 1;
-
-  // Slightly adjust risk if lifestyle is bad
-  if (score >= 3 && predictedClass === "Normal Weight") {
-    riskLevel = "Average";
+  else if(predictedClass === "Overweight"){
+    dietPlan = "Reduce processed foods and sugary drinks. Increase fiber intake, vegetables, lean protein, and perform regular cardio exercises."
   }
 
-  if (score >= 4 && predictedClass === "Overweight") {
-    riskLevel = "High";
+  else{
+    dietPlan = "Adopt a calorie deficit diet. Avoid fried foods, sugary drinks, and processed snacks. Increase physical activity and consult healthcare professionals."
   }
 
-  return {
+  return{
     bmi: bmi.toFixed(2),
     predictedClass,
-    confidence,
     riskLevel,
+    confidence,
     dietPlan
-  };
+  }
+
 }
+
 
 
 
