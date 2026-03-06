@@ -265,3 +265,28 @@ border-left:6px solid #ff3b3b;
 background:rgba(255,59,59,0.08);
 }
 
+.result{
+margin-top:20px;
+padding:20px;
+border-radius:12px;
+color:white;
+transition:0.3s;
+}
+
+/* NORMAL / LOW */
+.result.low{
+background:rgba(0,255,120,0.18);
+border:2px solid #00ff88;
+}
+
+/* MODERATE */
+.result.moderate{
+background:rgba(255,165,0,0.18);
+border:2px solid #ffa500;
+}
+
+/* HIGH / OBESE */
+.result.high{
+background:rgba(255,0,0,0.18);
+border:2px solid #ff3b3b;
+}

@@ -2,7 +2,6 @@ import { useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 
-
 function Predict() {
   const [form, setForm] = useState({
     weight: "",
@@ -104,7 +103,7 @@ function Predict() {
 )}
 
         {result && (
-  <div className={`result ${result?.riskLevel?.toLowerCase()}`}>
+  <div className={`result ${result?.riskLevel?.toLowerCase().trim()}`}>
     
     <p><strong>BMI:</strong> {result.bmi}</p>
 
